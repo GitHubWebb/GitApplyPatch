@@ -17,12 +17,12 @@ jobs:
             # 注意替换为你的 Gitee 目标仓库地址
             destination-repo: "git@gitee.com:LiuYanZhiYuZhiZhe/git-apply-patch.git"
                 
-        - name: Build Gitee Pages
-          uses: yanglbme/gitee-pages-action@master
-          with:
-            # 注意替换为你的 Gitee 用户名
-            gitee-username: LiuYanZhiYuZhiZhe
-            # 注意在 Settings->Secrets 配置 GITEE_PASSWORD 密码
-            gitee-password: ${{ secrets.GITEE_PASSWORD }}
-            # 注意替换为你的 Gitee 仓库
-            gitee-repo: LiuYanZhiYuZhiZhe/git-apply-patch
+#         - name: Build Gitee Pages
+#           uses: yanglbme/gitee-pages-action@master
+#           with:
+#             # 注意替换为你的 Gitee 用户名
+#             gitee-username: LiuYanZhiYuZhiZhe
+#             # 注意在 Settings->Secrets 配置 GITEE_PASSWORD 密码
+#             gitee-password: ${{ secrets.GITEE_PASSWORD }}
+#             # 注意替换为你的 Gitee 仓库
+#             gitee-repo: LiuYanZhiYuZhiZhe/git-apply-patch
