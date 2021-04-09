@@ -1,6 +1,6 @@
 name: SyncGitee
 
-on: [ psuh ]
+on: [ push ]
 
 jobs:
     build:
