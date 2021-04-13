@@ -1,0 +1,449 @@
+From ebabc3f3c7804a35a1139749d50227acc517af76 Mon Sep 17 00:00:00 2001
+From: wangweixu <kcxh8831658.com>
+Date: Wed, 7 Apr 2021 11:06:12 +0800
+Subject: [PATCH] =?UTF-8?q?1.=20=E6=8F=90=E5=8F=96=E5=85=B1=E6=9C=89?=
+ =?UTF-8?q?=E5=8F=82=E6=95=B0=E8=B0=83=E7=94=A8CC=E7=99=BB=E5=BD=95=202.?=
+ =?UTF-8?q?=20=E5=9C=A8=E9=9C=80=E8=A6=81=E9=87=8D=E6=96=B0=E7=99=BB?=
+ =?UTF-8?q?=E5=BD=95=E7=9A=84=E6=97=B6=E5=80=99,=E4=B8=8D=E9=98=BB?=
+ =?UTF-8?q?=E5=A1=9E=E6=8E=A5=E5=8F=A3=E8=AF=B7=E6=B1=82=203.=20=E5=8A=A0?=
+ =?UTF-8?q?=E5=85=A5CCSDKmodule=E7=BC=93=E5=AD=98?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ .../com/senyint/prod/edu/sector/js/JsApi.java   |  94 +------------
+ .../stu/model/bean/BeanCCSectionInfo.java     | 131 ++++++++++++++++++
+ .../stu/model/http/BaseInterceptor.java       |   3 +-
+ .../stu/view/fragment/home/HomeMain.java      |  94 +------------
+ ccvideo/build.gradle                          |   5 +-
+ ccvideo/proguard-rules.pro                    |   4 +
+ 6 files changed, 143 insertions(+), 188 deletions(-)
+
+diff --git a/app/src/main/java/com/senyint/prod/edu/sector/js/JsApi.java b/app/src/main/java/com/senyint/prod/edu/sector/js/JsApi.java
+index e9f32a5..41a72d1 100644
+--- a/app/src/main/java/com/senyint/prod/edu/sector/js/JsApi.java
++++ b/app/src/main/java/com/senyint/prod/edu/sector/js/JsApi.java
+@@ -12,16 +12,10 @@ import com.bokecc.sdk.mobile.live.DWLive;
+ import com.bokecc.sdk.mobile.live.pojo.TemplateInfo;
+ import com.bokecc.sdk.mobile.live.replay.DWLiveReplay;
+ import com.framelibrary.util.StringUtils;
+-import com.framelibrary.util.ToastUtils;
+ import com.framelibrary.util.logutil.LoggerUtils;
+ import com.google.gson.Gson;
+ import com.google.gson.JsonObject;
+ import com.google.gson.JsonParser;
+-import com.senyint.ccvideo.base.config.CCVideoConfig;
+-import com.senyint.ccvideo.bean.CCInitParamsInfo;
+-import com.senyint.ccvideo.bean.vod.HuodeVideoInfo;
+-import com.senyint.ccvideo.view.activity.vod.SpeedPlayActivity;
+-import com.senyint.ccvideo.view.activity.vod.VrPlayActivity;
+ import com.senyint.ryimkit.config.RYConfig;
+ import com.senyint.ryimkit.config.RYConfigBeanInfo;
+ import com.senyint.prod.edu.sector.SenyintApplication;
+@@ -117,93 +111,7 @@ public class JsApi extends Activity {
+         BeanCCSectionInfo ccSectionInfo = gson.fromJson(dataJO, BeanCCSectionInfo.class);
+         LoggerUtils.D("beanCCSectionInfo:" + ccSectionInfo);
+ 
+-        String realName = SPUtil.getUserInfo().getRealname();
+-
+-        BeanCCSectionInfo.CourseSectionBean courseSection = ccSectionInfo.getCourseSection();
+-        if (courseSection == null)
+-            return;
+-
+-        if (StringUtils.isEquals(courseSection.getSectionType(), "LIVE")) {
+-
+-            if (StringUtils.isEquals(courseSection.getSectionDateStatus(), "ING")) {
+-                // CC直播登录
+-                // talker true 是小班课 liveType = 50,false 是大直播 liveType = 10
+-                int liveType = ccSectionInfo.isTalker() ? 50 : 10;
+-                CCVideoConfig.getInstance().joinCCLive(mActivity,
+-                        CCInitParamsInfo.builder()
+-                                .ccEnumType(CCInitParamsInfo.CCEnumType.LIVE)
+-                                .mRoomId(ccSectionInfo.getCcRoomId())
+-                                .mUserId(ccSectionInfo.getCcSiteId())
+-                                .mNickName(realName)
+-                                .mCourseId(courseSection.getCourseId())
+-                                .mSectionId(courseSection.getId())
+-                                .mViewerToken(ccSectionInfo.getCcToken())
+-                                .mLiveId(ccSectionInfo.getCcLiveId())
+-                                .build(),
+-                        liveType);
+-            } else if (StringUtils.isEquals(courseSection.getSectionDateStatus(), "END")) {
+-                // CC直播回放登录
+-                // talker true 是小班课 liveType = 50,false 是大直播 liveType = 10
+-                if (StringUtils.isBlank(ccSectionInfo.getCcLiveId()) || StringUtils.isBlank(ccSectionInfo.getCcRecordId())) {
+-                    ToastUtils.showToastPass("暂无回放");
+-                    return;
+-                }
+-
+-                int liveType = ccSectionInfo.isTalker() ? 50 : 10;
+-                CCVideoConfig.getInstance().joinCCReplay(mActivity,
+-                        CCInitParamsInfo.builder()
+-                                .ccEnumType(CCInitParamsInfo.CCEnumType.LIVE_RECORD)
+-                                .mRoomId(ccSectionInfo.getCcRoomId())
+-                                .mUserId(ccSectionInfo.getCcSiteId())
+-                                .mNickName(realName)
+-                                .mCourseId(courseSection.getCourseId())
+-                                .mSectionId(courseSection.getId())
+-                                .mViewerToken(ccSectionInfo.getCcToken())
+-                                .mLiveId(ccSectionInfo.getCcLiveId())
+-                                .mRecordId(ccSectionInfo.getCcRecordId())
+-                                .build());
+-
+-            }
+-        } else if (StringUtils.isEquals(courseSection.getSectionType(), "LIVE_CLASS")) {
+-            // 加入小班课
+-            CCVideoConfig.getInstance().joinCCClass(mActivity,
+-                    CCInitParamsInfo.builder()
+-                            .ccEnumType(CCInitParamsInfo.CCEnumType.LIVE_CLASS)
+-                            .mRoomId(ccSectionInfo.getCcRoomId())
+-                            .mUserId(ccSectionInfo.getCcSiteId())
+-                            .mNickName(realName)
+-                            .mCourseId(courseSection.getCourseId())
+-                            .mSectionId(courseSection.getId())
+-                            .mViewerToken(ccSectionInfo.getCcToken())
+-                            .mLiveId(ccSectionInfo.getCcLiveId())
+-                            .build());
+-
+-        } else if (StringUtils.isEquals(courseSection.getSectionType(), "VIDEO")) {
+-            //创建录播信息
+-            // HuodeVideoInfo{videoTitle='获得场景视频', videoId='2477AD327B256E5C9C33DC5901307461', videoTime='0:04:33', videoCover='https://4-img.bokecc.com/comimage/391E6E3340A00767/2019-05-13/2477AD327B256E5C9C33DC5901307461-1.jpg'}
+-                            /*String houdeVideoInfoJsonStr = "{videoTitle='获得场景视频', videoId='2477AD327B256E5C9C33DC5901307461', videoTime='0:04:33', videoCover='https://4-img.bokecc.com/comimage/391E6E3340A00767/2019-05-13/2477AD327B256E5C9C33DC5901307461-1.jpg'}";
+-                            Gson gson = new Gson();
+-                            HuodeVideoInfo huodeVideoInfo = gson.fromJson(houdeVideoInfoJsonStr, HuodeVideoInfo.class);*/
+-
+-            CCVideoConfig.getInstance().mCcInitParamsInfo =
+-                    CCInitParamsInfo.builder()
+-                            .ccEnumType(CCInitParamsInfo.CCEnumType.VIDEO)
+-                            .mCourseId(courseSection.getCourseId())
+-                            .mSectionId(courseSection.getId())
+-                            .build();
+-            HuodeVideoInfo huodeVideoInfo = new HuodeVideoInfo(
+-                    courseSection.getSectionName(), ccSectionInfo.getVodVideoId()
+-            );
+-            Intent playIntent = new Intent(mActivity, VrPlayActivity.class);
+-            playIntent = new Intent(mActivity, SpeedPlayActivity.class);
+-            playIntent.putExtra("prohibitFastForwardStatus", true);
+-            playIntent.putExtra("videoId", huodeVideoInfo.getVideoId());
+-            playIntent.putExtra("videoTitle", huodeVideoInfo.getVideoTitle());
+-            playIntent.putExtra("videoCover", huodeVideoInfo.getVideoCover());
+-//                        playIntent.putParcelableArrayListExtra("videoDatas", videoDatas);
+-            mActivity.startActivity(playIntent);
+-            mActivity.overridePendingTransition(0, 0);//去掉切换动画关键;
+-        }
++        BeanCCSectionInfo.loginCCBySectionInfo(ccSectionInfo);
+ 
+     }
+ 
+diff --git a/app/src/main/java/com/senyint/prod/edu/sector/model/bean/BeanCCSectionInfo.java b/app/src/main/java/com/senyint/prod/edu/sector/model/bean/BeanCCSectionInfo.java
+index b47997b..5e195ae 100644
+--- a/app/src/main/java/com/senyint/prod/edu/sector/model/bean/BeanCCSectionInfo.java
++++ b/app/src/main/java/com/senyint/prod/edu/sector/model/bean/BeanCCSectionInfo.java
+@@ -1,5 +1,18 @@
+ package com.senyint.prod.edu.sector.model.bean;
+ 
++import android.app.Activity;
++import android.content.Intent;
++
++import com.framelibrary.util.StringUtils;
++import com.framelibrary.util.ToastUtils;
++import com.senyint.ccvideo.base.config.CCVideoConfig;
++import com.senyint.ccvideo.bean.CCInitParamsInfo;
++import com.senyint.ccvideo.bean.vod.HuodeVideoInfo;
++import com.senyint.ccvideo.view.activity.vod.SpeedPlayActivity;
++import com.senyint.ccvideo.view.activity.vod.VrPlayActivity;
++import com.senyint.prod.edu.sector.SenyintApplication;
++import com.senyint.prod.edu.sector.utils.SPUtil;
++
+ /**
+  * 直播,小班课,直播回放,点播,相关的CC小节课程信息
+  * 小节接口 (注意: 直播/直播回看/点播/小班课 都通过该接口返回对应的 CC初始化数据)
+@@ -413,4 +426,122 @@ public class BeanCCSectionInfo {
+                     '}';
+         }
+     }
++
++    /**
++     * 根据小节信息登录CC视频
++     *
++     * @param ccSectionInfo
++     */
++    public static void loginCCBySectionInfo(BeanCCSectionInfo ccSectionInfo) {
++        if (ccSectionInfo == null)
++            return;
++
++        BeanCCSectionInfo.CourseSectionBean courseSection = ccSectionInfo.getCourseSection();
++        if (courseSection == null)
++            return;
++
++        Activity currentActivity = SenyintApplication.getAppManager().currentActivity();
++        String realName = SPUtil.getUserInfo().getRealname();
++
++        if (StringUtils.isEquals(courseSection.getSectionType(), "LIVE")) {
++
++            if (StringUtils.isEquals(courseSection.getSectionDateStatus(), "ING")) {
++                // CC直播登录
++                // talker true 是小班课 liveType = 50,false 是大直播 liveType = 10
++                int liveType = ccSectionInfo.isTalker() ? 50 : 10;
++                CCVideoConfig.getInstance().joinCCLive(currentActivity,
++                        CCInitParamsInfo.builder()
++                                .ccEnumType(CCInitParamsInfo.CCEnumType.LIVE)
++                                .mRoomId(ccSectionInfo.getCcRoomId())
++                                .mUserId(ccSectionInfo.getCcSiteId())
++                                .mNickName(realName)
++                                .mCourseId(courseSection.getCourseId())
++                                .mSectionId(courseSection.getId())
++                                .mViewerToken(ccSectionInfo.getCcToken())
++                                .mLiveId(ccSectionInfo.getCcLiveId())
++                                .build(),
++                        liveType);
++            } else if (StringUtils.isEquals(courseSection.getSectionDateStatus(), "END")) {
++                // CC直播回放登录
++                // talker true 是小班课 liveType = 50,false 是大直播 liveType = 10
++                if (StringUtils.isBlank(ccSectionInfo.getCcLiveId()) || StringUtils.isBlank(ccSectionInfo.getCcRecordId())) {
++                    ToastUtils.showToastPass("暂无回放");
++                    return;
++                }
++
++                int liveType = ccSectionInfo.isTalker() ? 50 : 10;
++                CCVideoConfig.getInstance().joinCCReplay(currentActivity,
++                        CCInitParamsInfo.builder()
++                                .ccEnumType(CCInitParamsInfo.CCEnumType.LIVE_RECORD)
++                                .mRoomId(ccSectionInfo.getCcRoomId())
++                                .mUserId(ccSectionInfo.getCcSiteId())
++                                .mNickName(realName)
++                                .mCourseId(courseSection.getCourseId())
++                                .mSectionId(courseSection.getId())
++                                .mViewerToken(ccSectionInfo.getCcToken())
++                                .mLiveId(ccSectionInfo.getCcLiveId())
++                                .mRecordId(ccSectionInfo.getCcRecordId())
++                                .build());
++
++            }
++        } else if (StringUtils.isEquals(courseSection.getSectionType(), "LIVE_CLASS")) {
++
++            // talker true 是小班课 liveType = 50,false 是大直播 liveType = 10
++            int liveType = ccSectionInfo.isTalker() ? 50 : 10;
++            if (!ccSectionInfo.isTalker())
++                // CC直播登录
++                CCVideoConfig.getInstance().joinCCLive(currentActivity,
++                        CCInitParamsInfo.builder()
++                                .ccEnumType(CCInitParamsInfo.CCEnumType.LIVE)
++                                .mRoomId(ccSectionInfo.getCcRoomId())
++                                .mUserId(ccSectionInfo.getCcSiteId())
++                                .mNickName(realName)
++                                .mCourseId(courseSection.getCourseId())
++                                .mSectionId(courseSection.getId())
++                                .mViewerToken(ccSectionInfo.getCcToken())
++                                .mLiveId(ccSectionInfo.getCcLiveId())
++                                .build(),
++                        liveType);
++            else
++                // 加入小班课
++                CCVideoConfig.getInstance().joinCCClass(currentActivity,
++                        CCInitParamsInfo.builder()
++                                .ccEnumType(CCInitParamsInfo.CCEnumType.LIVE_CLASS)
++                                .mRoomId(ccSectionInfo.getCcRoomId())
++                                .mUserId(ccSectionInfo.getCcSiteId())
++                                .mNickName(realName)
++                                .mCourseId(courseSection.getCourseId())
++                                .mSectionId(courseSection.getId())
++                                .mViewerToken(ccSectionInfo.getCcToken())
++                                .mLiveId(ccSectionInfo.getCcLiveId())
++                                .build());
++
++        } else if (StringUtils.isEquals(courseSection.getSectionType(), "VIDEO")) {
++            //创建录播信息
++            // HuodeVideoInfo{videoTitle='获得场景视频', videoId='2477AD327B256E5C9C33DC5901307461', videoTime='0:04:33', videoCover='https://4-img.bokecc.com/comimage/391E6E3340A00767/2019-05-13/2477AD327B256E5C9C33DC5901307461-1.jpg'}
++                            /*String houdeVideoInfoJsonStr = "{videoTitle='获得场景视频', videoId='2477AD327B256E5C9C33DC5901307461', videoTime='0:04:33', videoCover='https://4-img.bokecc.com/comimage/391E6E3340A00767/2019-05-13/2477AD327B256E5C9C33DC5901307461-1.jpg'}";
++                            Gson gson = new Gson();
++                            HuodeVideoInfo huodeVideoInfo = gson.fromJson(houdeVideoInfoJsonStr, HuodeVideoInfo.class);*/
++
++            CCVideoConfig.getInstance().mCcInitParamsInfo =
++                    CCInitParamsInfo.builder()
++                            .ccEnumType(CCInitParamsInfo.CCEnumType.VIDEO)
++                            .mCourseId(courseSection.getCourseId())
++                            .mSectionId(courseSection.getId())
++                            .build();
++            HuodeVideoInfo huodeVideoInfo = new HuodeVideoInfo(
++                    courseSection.getSectionName(), ccSectionInfo.getVodVideoId()
++            );
++            Intent playIntent = new Intent(currentActivity, VrPlayActivity.class);
++            playIntent = new Intent(currentActivity, SpeedPlayActivity.class);
++            playIntent.putExtra("prohibitFastForwardStatus", true);
++            playIntent.putExtra("videoId", huodeVideoInfo.getVideoId());
++            playIntent.putExtra("videoTitle", huodeVideoInfo.getVideoTitle());
++            playIntent.putExtra("videoCover", huodeVideoInfo.getVideoCover());
++//                        playIntent.putParcelableArrayListExtra("videoDatas", videoDatas);
++            currentActivity.startActivity(playIntent);
++            currentActivity.overridePendingTransition(0, 0);//去掉切换动画关键;
++        }
++    }
++
+ }
+diff --git a/app/src/main/java/com/senyint/prod/edu/sector/model/http/BaseInterceptor.java b/app/src/main/java/com/senyint/prod/edu/sector/model/http/BaseInterceptor.java
+index ff46d5c..a294f25 100755
+--- a/app/src/main/java/com/senyint/prod/edu/sector/model/http/BaseInterceptor.java
++++ b/app/src/main/java/com/senyint/prod/edu/sector/model/http/BaseInterceptor.java
+@@ -107,7 +107,8 @@ public abstract class BaseInterceptor implements Interceptor {
+         if (isRequestContainRequiresUrl(request)) {
+ 
+             if (FirstActivity.isReloadLogin) {
+-                needBlock = true;
++                // 在需要重新登陆的时候不需要阻塞请求线程,只需要把其他请求都取消掉
++                needBlock = false;
+                 HttpHelper.cancel();
+ 
+                 // 如果当前已经是需要重新登录了,那则必须仅仅只能执行不需要登录的接口
+diff --git a/app/src/main/java/com/senyint/prod/edu/sector/view/fragment/home/HomeMain.java b/app/src/main/java/com/senyint/prod/edu/sector/view/fragment/home/HomeMain.java
+index ae1d866..e4022f5 100644
+--- a/app/src/main/java/com/senyint/prod/edu/sector/view/fragment/home/HomeMain.java
++++ b/app/src/main/java/com/senyint/prod/edu/sector/view/fragment/home/HomeMain.java
+@@ -35,13 +35,8 @@ import com.framelibrary.widget.gridview.MyViewPagerAdapter;
+ import com.framelibrary.widget.gridview.TeamInfoGridView;
+ import com.google.gson.JsonObject;
+ import com.google.gson.JsonParser;
+-import com.senyint.ccvideo.base.config.CCVideoConfig;
+-import com.senyint.ccvideo.bean.CCInitParamsInfo;
+ import com.senyint.ccvideo.bean.event.CCLearnLogEvent;
+ import com.senyint.ccvideo.bean.event.InfoChangeEvent;
+-import com.senyint.ccvideo.bean.vod.HuodeVideoInfo;
+-import com.senyint.ccvideo.view.activity.vod.SpeedPlayActivity;
+-import com.senyint.ccvideo.view.activity.vod.VrPlayActivity;
+ import com.senyint.prod.edu.sector.R;
+ import com.senyint.prod.edu.sector.SenyintApplication;
+ import com.senyint.prod.edu.sector.adapter.HomeCardRecommendLectureAdapter;
+@@ -406,94 +401,7 @@ public class HomeMain extends BaseFragment<HomeMainPresenter> implements HomeMai
+                 if (ccSectionInfo == null)
+                     return;
+ 
+-                String realName = SPUtil.getUserInfo().getRealname();
+-
+-                BeanCCSectionInfo.CourseSectionBean courseSection = ccSectionInfo.getCourseSection();
+-                if (courseSection == null)
+-                    return;
+-
+-
+-                if (StringUtils.isEquals(courseSection.getSectionType(), "LIVE")) {
+-
+-                    if (StringUtils.isEquals(courseSection.getSectionDateStatus(), "ING")) {
+-                        // CC直播登录
+-                        // talker true 是小班课 liveType = 50,false 是大直播 liveType = 10
+-                        int liveType = ccSectionInfo.isTalker() ? 50 : 10;
+-                        CCVideoConfig.getInstance().joinCCLive(mActivity,
+-                                CCInitParamsInfo.builder()
+-                                        .ccEnumType(CCInitParamsInfo.CCEnumType.LIVE)
+-                                        .mRoomId(ccSectionInfo.getCcRoomId())
+-                                        .mUserId(ccSectionInfo.getCcSiteId())
+-                                        .mNickName(realName)
+-                                        .mCourseId(courseSection.getCourseId())
+-                                        .mSectionId(courseSection.getId())
+-                                        .mViewerToken(ccSectionInfo.getCcToken())
+-                                        .mLiveId(ccSectionInfo.getCcLiveId())
+-                                        .build(),
+-                                liveType);
+-                    } else if (StringUtils.isEquals(courseSection.getSectionDateStatus(), "END")) {
+-                        // CC直播回放登录
+-                        // talker true 是小班课 liveType = 50,false 是大直播 liveType = 10
+-                        if (StringUtils.isBlank(ccSectionInfo.getCcLiveId()) || StringUtils.isBlank(ccSectionInfo.getCcRecordId())) {
+-                            ToastUtils.showToastPass("暂无回放");
+-                            return;
+-                        }
+-
+-                        int liveType = ccSectionInfo.isTalker() ? 50 : 10;
+-                        CCVideoConfig.getInstance().joinCCReplay(mActivity,
+-                                CCInitParamsInfo.builder()
+-                                        .ccEnumType(CCInitParamsInfo.CCEnumType.LIVE_RECORD)
+-                                        .mRoomId(ccSectionInfo.getCcRoomId())
+-                                        .mUserId(ccSectionInfo.getCcSiteId())
+-                                        .mNickName(realName)
+-                                        .mCourseId(courseSection.getCourseId())
+-                                        .mSectionId(courseSection.getId())
+-                                        .mViewerToken(ccSectionInfo.getCcToken())
+-                                        .mLiveId(ccSectionInfo.getCcLiveId())
+-                                        .mRecordId(ccSectionInfo.getCcRecordId())
+-                                        .build());
+-
+-                    }
+-                } else if (StringUtils.isEquals(courseSection.getSectionType(), "LIVE_CLASS")) {
+-                    // 加入小班课
+-                    CCVideoConfig.getInstance().joinCCClass(mActivity,
+-                            CCInitParamsInfo.builder()
+-                                    .ccEnumType(CCInitParamsInfo.CCEnumType.LIVE_CLASS)
+-                                    .mRoomId(ccSectionInfo.getCcRoomId())
+-                                    .mUserId(ccSectionInfo.getCcSiteId())
+-                                    .mNickName(realName)
+-                                    .mCourseId(courseSection.getCourseId())
+-                                    .mSectionId(courseSection.getId())
+-                                    .mViewerToken(ccSectionInfo.getCcToken())
+-                                    .mLiveId(ccSectionInfo.getCcLiveId())
+-                                    .build());
+-
+-                } else if (StringUtils.isEquals(courseSection.getSectionType(), "VIDEO")) {
+-                    //创建录播信息
+-                    // HuodeVideoInfo{videoTitle='获得场景视频', videoId='2477AD327B256E5C9C33DC5901307461', videoTime='0:04:33', videoCover='https://4-img.bokecc.com/comimage/391E6E3340A00767/2019-05-13/2477AD327B256E5C9C33DC5901307461-1.jpg'}
+-                    /*String houdeVideoInfoJsonStr = "{videoTitle='获得场景视频', videoId='2477AD327B256E5C9C33DC5901307461', videoTime='0:04:33', videoCover='https://4-img.bokecc.com/comimage/391E6E3340A00767/2019-05-13/2477AD327B256E5C9C33DC5901307461-1.jpg'}";
+-                    Gson gson = new Gson();
+-                    HuodeVideoInfo huodeVideoInfo = gson.fromJson(houdeVideoInfoJsonStr, HuodeVideoInfo.class);*/
+-
+-                    CCVideoConfig.getInstance().mCcInitParamsInfo =
+-                            CCInitParamsInfo.builder()
+-                                    .ccEnumType(CCInitParamsInfo.CCEnumType.VIDEO)
+-                                    .mCourseId(courseSection.getCourseId())
+-                                    .mSectionId(courseSection.getId())
+-                                    .build();
+-                    HuodeVideoInfo huodeVideoInfo = new HuodeVideoInfo(
+-                            courseSection.getSectionName(), ccSectionInfo.getVodVideoId()
+-                    );
+-                    Intent playIntent = new Intent(mActivity, VrPlayActivity.class);
+-                    playIntent = new Intent(mActivity, SpeedPlayActivity.class);
+-                    playIntent.putExtra("prohibitFastForwardStatus", true);
+-                    playIntent.putExtra("videoId", huodeVideoInfo.getVideoId());
+-                    playIntent.putExtra("videoTitle", huodeVideoInfo.getVideoTitle());
+-                    playIntent.putExtra("videoCover", huodeVideoInfo.getVideoCover());
+-//                        playIntent.putParcelableArrayListExtra("videoDatas", videoDatas);
+-                    startActivity(playIntent);
+-                    mActivity.overridePendingTransition(0, 0);//去掉切换动画关键;
+-                }
++                BeanCCSectionInfo.loginCCBySectionInfo(ccSectionInfo);
+ 
+             }
+ 
+diff --git a/ccvideo/build.gradle b/ccvideo/build.gradle
+index 2a4beb3..bc9b962 100644
+--- a/ccvideo/build.gradle
++++ b/ccvideo/build.gradle
+@@ -36,11 +36,14 @@ android {
+     buildTypes {
+         release {
+             minifyEnabled false
+-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
++            consumerProguardFiles 'proguard-rules.pro' // 配置子module混淆文件规则
++//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+         }
+         debug {
+             minifyEnabled false
+             debuggable true
++            consumerProguardFiles 'proguard-rules.pro' // 配置子module混淆文件规则
++
+         }
+     }
+ 
+diff --git a/ccvideo/proguard-rules.pro b/ccvideo/proguard-rules.pro
+index f62731d..1bfebd7 100644
+--- a/ccvideo/proguard-rules.pro
++++ b/ccvideo/proguard-rules.pro
+@@ -78,4 +78,8 @@
+ -keep public interface org.webrtc.**{*;}
+ -keep class io.agora.**{*;}
+ -keep class com.zego.**{*;}
++
++
++-dontwarn com.zego.**
++-keep class com.zego.**{*;}
+ #CC 6.1.12 小班课 end
+\ No newline at end of file
+-- 
+2.27.0
+

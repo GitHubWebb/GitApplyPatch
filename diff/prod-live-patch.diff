@@ -1,0 +1,210 @@
+From 6583264a83719ecd83153bd23ac54fb6f8fd8a47 Mon Sep 17 00:00:00 2001
+From: wangweixu <kcxh8831658.com>
+Date: Mon, 12 Apr 2021 16:48:03 +0800
+Subject: [PATCH] =?UTF-8?q?=E5=B0=86=E5=8E=9F=E6=9C=AC=E6=97=A0=E6=95=B0?=
+ =?UTF-8?q?=E6=8D=AE=E6=98=BE=E7=A4=BA=E5=8D=A0=E4=BD=8D=E6=8F=90=E7=A4=BA?=
+ =?UTF-8?q?=E4=BF=A1=E6=81=AF=E6=9B=B4=E6=94=B9=E4=B8=BA=E9=9A=90=E8=97=8F?=
+ =?UTF-8?q?View=20=E8=BF=91=E6=9C=9F=E7=9B=B4=E6=92=AD/=E7=B2=BE=E9=80=89?=
+ =?UTF-8?q?=E8=AF=BE=E7=A8=8B/=E8=BF=9C=E7=A8=8B=E5=8C=BB=E7=96=97?=
+ =?UTF-8?q?=E5=9F=B9=E8=AE=AD/=E4=B8=93=E5=B1=9E=E9=98=B5=E5=9C=B0?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ .../stu/view/fragment/home/HomeMain.java      | 38 ++++++++++++++++++-
+ app/src/main/res/layout/frgmt_home_main.xml   | 15 ++++++--
+ 2 files changed, 47 insertions(+), 6 deletions(-)
+
+diff --git a/app/src/main/java/com/xinyi/prodedugateway/edu/college/stu/view/fragment/home/HomeMain.java b/app/src/main/java/com/xinyi/prodedugateway/edu/college/stu/view/fragment/home/HomeMain.java
+index e4022f5..b6dff9b 100644
+--- a/app/src/main/java/com/xinyi/prodedugateway/edu/college/stu/view/fragment/home/HomeMain.java
++++ b/app/src/main/java/com/xinyi/prodedugateway/edu/college/stu/view/fragment/home/HomeMain.java
+@@ -120,6 +120,10 @@ public class HomeMain extends BaseFragment<HomeMainPresenter> implements HomeMai
+     LinearLayout llHomeLive;
+     @BindView(R.id.rv_home_live)
+     RecyclerView recyclerViewLive;
++
++    @BindView(R.id.ll_information_hotspot)
++    LinearLayout llInformationHotspot;
++
+     @BindView(R.id.rv_information_hotspot)
+     RecyclerView rvInformationHotspot; //资讯热点
+ 
+@@ -130,6 +134,8 @@ public class HomeMain extends BaseFragment<HomeMainPresenter> implements HomeMai
+     ImageView ivAdvertisingSpace;
+ 
+     // 精选课程
++    @BindView(R.id.ll_home_featured_course)
++    LinearLayout llHomeFeaturedCourse;
+     @BindView(R.id.rv_home_featured_course)
+     RecyclerView rvFeaturedCourse;
+     @BindView(R.id.home_main_swrefresh)
+@@ -158,6 +164,8 @@ public class HomeMain extends BaseFragment<HomeMainPresenter> implements HomeMai
+     TextView tvRecommendAreaThree;
+ 
+     // 专属阵地
++    @BindView(R.id.ll_exclusive_position)
++    LinearLayout llExclusivePosition;
+     @BindView(R.id.rv_exclusive_position)
+     RecyclerView rvExclusivePos;
+ 
+@@ -285,8 +293,9 @@ public class HomeMain extends BaseFragment<HomeMainPresenter> implements HomeMai
+         //精选课程,推荐课程初始化
+         RecyclerViewConfig.initRecyclerView(getActivity(), rvFeaturedCourse);
+         RecyclerViewConfig.addOnScrollListener(rvFeaturedCourse, null, mSwipeRefreshLayout);
++        llHomeFeaturedCourse.setVisibility(View.GONE);
+         rvFeaturedCourse.setAdapter(mFeaturedCourseAdapter);
+-        TextView tvFeatureCourseEmptyView = (TextView) ViewUtil.getItemView(rvInformationHotspot, R.layout.view_empty_home_live);
++        TextView tvFeatureCourseEmptyView = (TextView) ViewUtil.getItemView(rvFeaturedCourse, R.layout.view_empty_home_live);
+         tvFeatureCourseEmptyView.setText(R.string.home_feature_course_empty);
+         mFeaturedCourseAdapter.setEmptyView(tvFeatureCourseEmptyView);
+         mFeaturedCourseAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
+@@ -333,6 +342,7 @@ public class HomeMain extends BaseFragment<HomeMainPresenter> implements HomeMai
+         TextView tvInfomationHotspotView = (TextView) ViewUtil.getItemView(rvInformationHotspot, R.layout.view_empty_home_live);
+         tvInfomationHotspotView.setText(R.string.home_infomation_hotspot_empty);
+         mInfoHotAdapter.setEmptyView(tvInfomationHotspotView);
++        llInformationHotspot.setVisibility(View.GONE);
+         rvInformationHotspot.setAdapter(mInfoHotAdapter);
+ 
+         rvInformationHotspot.addOnItemTouchListener(new OnItemClickListener() {
+@@ -383,6 +393,8 @@ public class HomeMain extends BaseFragment<HomeMainPresenter> implements HomeMai
+ 
+             }
+         });
++
++        llExclusivePosition.setVisibility(View.GONE);
+         rvExclusivePos.setAdapter(recommendedLecturerAdapter);
+     }
+ 
+@@ -631,6 +643,15 @@ public class HomeMain extends BaseFragment<HomeMainPresenter> implements HomeMai
+         mInfoHotList = new ArrayList<>();
+         mInfoHotList = list;
+         mInfoHotList = mInfoHotList.subList(0, mInfoHotList.size() > 3 ? 3 : mInfoHotList.size());
++
++        mInfoHotList = mInfoHotList == null ? null : mInfoHotList.subList(0, mInfoHotList.size() > 3 ? 3 : mInfoHotList.size());
++
++        mInfoHotList = null;
++        if (mInfoHotList == null || mInfoHotList.isEmpty())
++            llInformationHotspot.setVisibility(View.GONE);
++        else
++            llInformationHotspot.setVisibility(View.VISIBLE);
++
+         mInfoHotAdapter.setNewData(mInfoHotList);
+     }
+ 
+@@ -684,6 +705,10 @@ public class HomeMain extends BaseFragment<HomeMainPresenter> implements HomeMai
+         recommendListBean.setImg(R.mipmap.ic_home_know_card + "");
+ 
+ //        courseRecommendListBeans.add(recommendListBean);
++        if (courseRecommendListBeans == null || courseRecommendListBeans.isEmpty())
++            llHomeFeaturedCourse.setVisibility(View.GONE);
++        else
++            llHomeFeaturedCourse.setVisibility(View.VISIBLE);
+ 
+         mFeaturedCourseAdapter.setNewData(courseRecommendListBeans);
+     }
+@@ -702,14 +727,16 @@ public class HomeMain extends BaseFragment<HomeMainPresenter> implements HomeMai
+             }
+ 
+             // 同时为了界面友好,继续展示空数据提示页面
+-
++            llRecommendAreaRoot.setVisibility(View.GONE);
+             llRecommendAreaFirst.setVisibility(View.GONE);
+             llRecommendAreaOther.setVisibility(View.GONE);
+             tvRecommendAreaEmpty.setVisibility(View.VISIBLE);
++
+             return;
+ 
+         }
+ 
++        llRecommendAreaRoot.setVisibility(View.VISIBLE);
+         llRecommendAreaFirst.setVisibility(View.VISIBLE);
+         llRecommendAreaOther.setVisibility(View.VISIBLE);
+         tvRecommendAreaEmpty.setVisibility(View.GONE);
+@@ -749,6 +776,11 @@ public class HomeMain extends BaseFragment<HomeMainPresenter> implements HomeMai
+     @Override
+     public void setRecommendedLectureData(List<BeanHomeInfo.SocialCircleListBean> circleListBeans) {
+         this.circleListBeans = circleListBeans;
++
++        if (circleListBeans == null || circleListBeans.isEmpty())
++            llExclusivePosition.setVisibility(View.GONE);
++        else llExclusivePosition.setVisibility(View.VISIBLE);
++
+         recommendedLecturerAdapter.setNewData(circleListBeans);
+     }
+ 
+@@ -859,6 +891,8 @@ public class HomeMain extends BaseFragment<HomeMainPresenter> implements HomeMai
+         this.recommendedAreaListCurrentPage = 1;
+         presenter.getUnReadNotifMsgCount();
+ 
++        if (collegeListBeans == null || collegeListBeans.isEmpty())
++            llRecommendAreaRoot.setVisibility(View.GONE);
+         presenter.getMainHome();
+ 
+         //将设备IDuserid设置为别名
+diff --git a/app/src/main/res/layout/frgmt_home_main.xml b/app/src/main/res/layout/frgmt_home_main.xml
+index a5ddd4f..39ef323 100644
+--- a/app/src/main/res/layout/frgmt_home_main.xml
++++ b/app/src/main/res/layout/frgmt_home_main.xml
+@@ -98,7 +98,7 @@
+                     android:layout_height="wrap_content"
+                     android:orientation="vertical"
+                     android:visibility="gone"
+-                    tools:visibility="visible">
++                    tools:visibility="gone">
+ 
+                     <androidx.constraintlayout.widget.ConstraintLayout
+                         android:id="@+id/csl_live_recommend"
+@@ -165,10 +165,11 @@
+ 
+                 <!-- 精选课程 start -->
+                 <LinearLayout
++                    android:id="@+id/ll_home_featured_course"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:orientation="vertical"
+-                    tools:visibility="visible">
++                    tools:visibility="gone">
+ 
+                     <androidx.constraintlayout.widget.ConstraintLayout
+                         android:id="@+id/csl_featured_course"
+@@ -238,9 +239,11 @@
+ 
+                 <!--资讯热点 -->
+                 <LinearLayout
++                    android:id="@+id/ll_information_hotspot"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:orientation="vertical"
++                    android:visibility="gone"
+                     tools:visibility="gone">
+ 
+                     <androidx.constraintlayout.widget.ConstraintLayout
+@@ -341,7 +344,8 @@
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:orientation="vertical"
+-                    tools:visibility="visible">
++                    android:visibility="gone"
++                    tools:visibility="gone">
+ 
+                     <androidx.constraintlayout.widget.ConstraintLayout
+                         android:id="@+id/csl_recommend_area"
+@@ -584,9 +588,12 @@
+ 
+                 <!-- 专属阵地 start -->
+                 <LinearLayout
++                    android:id="@+id/ll_exclusive_position"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+-                    android:orientation="vertical">
++                    android:orientation="vertical"
++                    android:visibility="gone"
++                    tools:visibility="gone">
+ 
+                     <androidx.constraintlayout.widget.ConstraintLayout
+                         android:id="@+id/csl_exclusive_position"
+-- 
+2.27.0
+
